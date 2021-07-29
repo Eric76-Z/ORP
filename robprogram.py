@@ -202,6 +202,8 @@ def backupState():
 
 
 def main():
+    # age = input('输入参数：')
+    # print(age)
     # 1.获取路径
     # getZipInfo()
     #
