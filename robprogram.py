@@ -1,46 +1,42 @@
 # 用于提取某压缩包中某文件内容，并解析
 import os
 import shutil
+import time
 import zipfile
-
-# from RobotInfo.Constant import PATHRB
-from xml.dom import minidom
 
 import xlrd
 import xlwt
+from xlutils.copy import copy
 
 from pathmap import pathmap
+# 预设变量
+BASE_PATH = 'D:\\rob'
+PATHRB = 'D:\\rob\\old'  #原备份所在文件夹
+PATH_EXPORT = 'D:\\rob\\new'  #重整后文件夹位置
 
-PATHRB = 'E:\\old'
-PATH_EXPORT = 'E:\\new'
-targetData = {}
-buStandard ={
-    'filepath': 'E:\\new',
+buStandard = {
+    'filepath': BASE_PATH,
     'filename': 'BackUpStandard.xls'
 }
+# 全局变量
+targetData = {}
+
+# RobotDatas = {}
+# mainData = []
+# ExcleDatas = []
+# rootlists = []
+# dirlists = []
 
 
-RobotDatas = {}
-mainData = []
-ExcleDatas = []
-rootlists = []
-dirlists = []
-
-
-# 各文件路径
-filepaths = {
-    'zipfilepath': [],  # zip格式文件
-
-}
-areakeyword = {
-}
-
-targetFile = 'RobotInfo.xml'
-zipfileTarget = 'C/KRC/Roboter/Rdc/RobotInfo.xml'
-extractTo = 'unzip\\'
-extractedFileList = []  # 列表，储存解压后文件路径
-
-ExclePath = '机器人Rdc数据表V4.xls'
+# areakeyword = {
+# }
+#
+# targetFile = 'RobotInfo.xml'
+# zipfileTarget = 'C/KRC/Roboter/Rdc/RobotInfo.xml'
+# extractTo = 'unzip\\'
+# extractedFileList = []  # 列表，储存解压后文件路径
+#
+# ExclePath = '机器人Rdc数据表V4.xls'
 
 
 # 获取zip格式文件路径路径
@@ -49,7 +45,6 @@ def getZipInfo():
         for name in files:
             if name.endswith('.zip'):
                 originpath = os.path.join(root, name)
-                filepaths['zipfilepath'].append(originpath)  # zip格式文件路径路径
                 controllername = name.split('.zip')[0]
                 # print(controllername[0][-7:])
                 workstationname = controllername[-7:]  # 截取的 eg.k2a3a131s460r04 后7位
@@ -74,7 +69,7 @@ def getZipInfo():
                     'Lv2'] + '\\' + targetData[controllername]['Lv3']
                 targetData[controllername]['newpath'] = newpath
 
-                #移动重整文件
+                # 移动重整文件
                 folder = os.path.exists(targetData[controllername]['newpath'])
                 if not folder:  # 判断是否存在文件夹如果不存在则创建为文件夹
                     os.makedirs(targetData[controllername]['newpath'])  # makedirs 创建文件时如果路径不存在会创建这个路径
@@ -82,34 +77,50 @@ def getZipInfo():
                     pass
                 if not os.path.exists(targetData[controllername]['newpath'] + '\\' + name):
                     print(targetData[controllername]['newpath'] + '\\' + controllername)
-                    shutil.move(targetData[controllername]['originpath'], targetData[controllername]['newpath'])
+                    # shutil.move(targetData[controllername]['originpath'], targetData[controllername]['newpath'])
+                    shutil.copy2(targetData[controllername]['originpath'], targetData[controllername]['newpath'])
                 else:
-                    shutil.move(targetData[controllername]['originpath'],
-                                targetData[controllername]['newpath'] + '\\' + name + '副本')
+                    # shutil.move(targetData[controllername]['originpath'],
+                    #             targetData[controllername]['newpath'] + '\\' + name + '副本')
+                    shutil.copy2(targetData[controllername]['originpath'],
+                                 targetData[controllername]['newpath'] + '\\' + name + '副本')
 
-def mapControllername(controllername):
-    standard_filepath = buStandard['filepath'] + '\\' + buStandard['filename']
-    StandardSheet = xlrd.open_workbook(standard_filepath).sheet_by_index(0)
-    nrows = StandardSheet.nrows  # 行
-    for i in range(nrows):
-        lng = StandardSheet.cell(i, 1).value
-        if controllername == lng:
-            pass
-        # 写到这
+
+# def mapControllername(controllername):
+#
+#
+#         # 写到这
+
 
 def backupState():
+
+    standard_filepath = buStandard['filepath'] + '\\' + buStandard['filename']
+    book_rd = xlrd.open_workbook(standard_filepath, formatting_info=True)
+    sheet_rd = book_rd.sheet_by_index(0)
+
+    book_wt = copy(book_rd)
+    worksheet_name = 'rob'
+    sheet_wt = book_wt.get_sheet(worksheet_name)
+    nrows = sheet_rd.nrows
     for root, dirs, files in os.walk(PATH_EXPORT):
         for name in files:
             controllername = name.split('.zip')[0]
-            mapControllername(controllername)
 
-    # standard_filepath = buStandard['filepath'] + '\\' + buStandard['filename']
-    # StandardSheet = xlrd.open_workbook(standard_filepath).sheet_by_index(0)
-    # print(StandardSheet)
-    # nrows = StandardSheet.nrows  # 行
-    # print(nrows)
-
-
+            flag = True
+            for i in range(nrows):
+                lng = sheet_rd.cell(i - 1, 1).value
+                if lng == controllername:
+                    sheet_wt.write(i, 3, label='已备份')
+                    sheet_wt.write(i, 4, label=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+                    flag = False
+                    break
+            if flag == True:
+                nrows_new = sheet_rd.nrows  # 行
+                print(nrows_new)
+                sheet_wt.write(nrows_new, 1, controllername)
+                sheet_wt.write(nrows_new, 3, label='新工位')
+                sheet_wt.write(nrows_new, 4, label=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    book_wt.save(BASE_PATH + '\\' + time.strftime("%Y%m%d", time.localtime()) + buStandard['filename'])
 
 
 # # 解压某文件到指定文件夹
@@ -205,7 +216,7 @@ def main():
     # age = input('输入参数：')
     # print(age)
     # 1.获取路径
-    # getZipInfo()
+    getZipInfo()
     #
     backupState()
 
