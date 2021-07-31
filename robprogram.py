@@ -90,11 +90,11 @@ def getZipInfo():
                 targetData[compare_name]['originpath'] = originpath
                 targetData[compare_name]['controller'] = compare_name
                 targetData[compare_name]['workstation'] = workstationname
-                if controllername[0:2] == 'k1':
+                if controllername[0:2].lower() == 'k1':
                     targetData[compare_name]['Lv1'] = 'CPH2.1'
-                elif controllername[0:2] == 'k2':
+                elif controllername[0:2].lower() == 'k2':
                     targetData[compare_name]['Lv1'] = 'CPH2.2'
-                elif controllername[0:2] == 'k3':
+                elif controllername[0:2].lower() == 'k3':
                     targetData[compare_name]['Lv1'] = 'CPH2.1'
                     logWrite(controllername, '一级地点为k3')
                 else:

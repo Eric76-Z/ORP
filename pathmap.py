@@ -18,11 +18,15 @@ pathmap = {
     },
     'ltvl': {
         'Lv2': 'UB',
-        'Lv3': 'LTVL',
+        'Lv3': 'LTV',
     },
     'ltvr': {
         'Lv2': 'UB',
-        'Lv3': 'LTVR',
+        'Lv3': 'LTV',
+    },
+    'ultv': {
+        'Lv2': 'UB',
+        'Lv3': 'LTV',
     },
     'ustw': {
         'Lv2': 'UB',
