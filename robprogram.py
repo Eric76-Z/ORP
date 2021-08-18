@@ -69,7 +69,7 @@ def logWriteTitle(msg):
     log.close()
 
 
-# 获取zip格式文件路径路径
+# 获取zip格式文件路径路径,并移动重整文件
 def getZipInfo():
     global TOTAL_FILES
 
@@ -81,7 +81,6 @@ def getZipInfo():
                 originpath = os.path.join(root, name)
                 controllername = name.split('.zip')[0]
                 workstationname = controllername[-7:].upper()  # 截取的 eg.k2a3a131s460r04 后7位
-                # print(workstationname)
                 if isAll == True:
                     compare_name = controllername
                 else:
@@ -96,16 +95,16 @@ def getZipInfo():
                     targetData[compare_name]['Lv1'] = 'CPH2.2'
                 elif controllername[0:2].lower() == 'k3':
                     targetData[compare_name]['Lv1'] = 'CPH2.1'
-                    logWrite(controllername, '一级地点为k3')
+                    logWrite(controllername, '[警告]：一级地点为k3')
                 else:
                     # print(compare_name)
                     # targetData[compare_name]['errmsg'] = '没有对应一级地点'
                     ERR_FILES = ERR_FILES + 1
                     logWrite(controllername, '没有对应一级地点')
                     continue
-                if controllername[2:6] in pathmap:
-                    targetData[compare_name]['Lv2'] = pathmap[controllername[2:6]]['Lv2']
-                    targetData[compare_name]['Lv3'] = pathmap[controllername[2:6]]['Lv3']
+                if controllername[2:6].lower() in pathmap:
+                    targetData[compare_name]['Lv2'] = pathmap[controllername[2:6].lower()]['Lv2']
+                    targetData[compare_name]['Lv3'] = pathmap[controllername[2:6].lower()]['Lv3']
                 else:
                     logWrite(controllername, '找不到对应区域')
                     ERR_FILES = ERR_FILES + 1
@@ -163,8 +162,8 @@ def backupState():
                     break
             if flag == True:
                 sheet_wt.write(nrows_compare, COMPARE_COL - 3, targetData[compare_name]['Lv1'])
-                sheet_wt.write(nrows_compare, COMPARE_COL - 2, pathmap[controllername[2:6]]['Lv2'])
-                sheet_wt.write(nrows_compare, COMPARE_COL - 1, pathmap[controllername[2:6]]['Lv3'])
+                sheet_wt.write(nrows_compare, COMPARE_COL - 2, pathmap[controllername[2:6].lower()]['Lv2'])
+                sheet_wt.write(nrows_compare, COMPARE_COL - 1, pathmap[controllername[2:6].lower()]['Lv3'])
                 sheet_wt.write(nrows_compare, COMPARE_COL, compare_name)
                 sheet_wt.write(nrows_compare, COMMIT_COL, label='新工位')
                 sheet_wt.write(nrows_compare, TIME_COL, label=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -174,7 +173,7 @@ def backupState():
     log.write('备份总数: ' + str(TOTAL_FILES) + '        已处理: ' + str(DEAL_FILES) + '         异常: ' + str(ERR_FILES) + '\r\n')
     log.close()
     logWriteTitle('end')
-    book_wt.save(BASE_PATH + '\\' + time.strftime("%Y%m%d", time.localtime()) + buStandard['filename'])
+    book_wt.save(BASE_PATH + '\\' + time.strftime("%Y%m%d", time.localtime()) + '机器人备份情况.xls')
 
 
 # # 解压某文件到指定文件夹
