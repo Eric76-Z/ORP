@@ -2,7 +2,7 @@
 import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication
 
-import orp_demo
+from history import orp_demo
 
 ####################### 全局变量#########################
 app = QApplication(sys.argv)

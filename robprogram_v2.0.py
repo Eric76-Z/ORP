@@ -4,99 +4,15 @@ import shutil
 import time
 import xlrd
 from xlutils.copy import copy
+
+from ini import RobProgramData, PATH_ORIGIN_BACKUP, PATH_EXPORT_TO
 from pathmap import pathmap
 
-# 配置变量
-PATH_BASE = 'F:\\New folder'  # 根目录
-PATH_ORIGIN_BACKUP = PATH_BASE + '\\' + 'old'  # 原备份所在文件夹
-PATH_EXPORT_TO = PATH_BASE + '\\' + 'new'  # 重整后文件夹位置
-LOG_FILE_NAME = 'log.txt'
-
-buStandard = {
-    'filepath': PATH_BASE,  # 存储在根目录
-    'filename': '机器人备份状态.xls'  # 定义名字
-}
+# 获取RobotProgram对象信息，并写入
+from utils import TimeStampToTime, logWrite, logWriteTitle
 
 
-# 全局变量
-class RobProgramData:
-    def __init__(self):
-        self.sort = '机器人程序'
-        self.path = {
-            'path_origin': '',
-            'path_new': ''
-        }
-        self.meta = {
-            'title': '',
-            'mtime': '',
-            'format': '',
-        }
-        self.data = {
-            'controllername': '',
-            'workstationname': '',
-        }
-
-    def localLv1(self):
-        if self.data['controllername'][0:2].lower() == 'k1':
-            return 'CPH2.1'
-        elif self.data['controllername'][0:2].lower() == 'k2':
-            return 'CPH2.2'
-        elif self.data['controllername'][0:2].lower() == 'k3':
-            return 'CPH2.1'
-        else:
-            return ''
-
-    def localLv2(self):
-        if self.data['controllername'][2:6].lower() in pathmap:
-            return pathmap[self.data['controllername'][2:6].lower()]['Lv2']
-        else:
-            return ''
-
-    def localLv3(self):
-        if self.data['controllername'][2:6].lower() in pathmap:
-            return pathmap[self.data['controllername'][2:6].lower()]['Lv3']
-        else:
-            return ''
-
-
-targetData = {}
-isAll = False  # True:全名对比， False后七位对比，eg:S240R01
-
-# 表格
-SHEET_NAME = 'robot'
-COMPARE_COL = 5
-COMMIT_COL = 6
-TIME_COL = 7
-Lv3 = 4
-Lv2 = 3
-Lv1 = 2
-
-# 总结
-TOTAL_FILES = 0  # 更目录下文件总数
-DEAL_FILES = 0
-ERR_FILES = 0
-
-
-def logWrite(controllername, msg):
-    log = open(PATH_BASE + '\\' + LOG_FILE_NAME, 'a')
-    log.write(controllername + '[' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ']' + ' :' + msg + '\r\n')
-    log.close()
-
-
-def logWriteTitle(msg):
-    log = open(PATH_BASE + '\\' + LOG_FILE_NAME, 'a')
-    log.write('==============================' + msg + '==============================' + '\r\n')
-    log.close()
-
-
-# 　　'''把时间戳转化为时间: 1479264792 to 2016-11-16 10:53:12'''
-def TimeStampToTime(timestamp):
-    timeStruct = time.localtime(timestamp)
-    return time.strftime('%Y-%m-%d %H:%M:%S', timeStruct)
-
-
-# 获取zip格式文件路径路径,并移动重整文件
-def getZipInfo():
+def RobotInfo():
     rob_program_data = RobProgramData()
     global TOTAL_FILES
     global ERR_FILES
@@ -104,7 +20,6 @@ def getZipInfo():
         for name in files:
             TOTAL_FILES = TOTAL_FILES + 1
             if name.endswith('.zip'):
-
                 originpath = os.path.join(root, name)
                 # ================path==================
                 rob_program_data.path['path_origin'] = originpath  # 原始路径
@@ -118,21 +33,11 @@ def getZipInfo():
                                                            -7:].upper()  # 截取的 eg.s460r04
                 rob_program_data.data['localLv1'] = rob_program_data.localLv1()
 
-                def localLv2(self):
-                    if self.data['controllername'][2:6].lower() in pathmap:
-                        return pathmap[self.data['controllername'][2:6].lower()]['Lv2']
-                    else:
-                        return ''
-
-                json_str = json.dumps(rob_program_data, default=lambda obj: obj.__dict__)
-                print(json_str)
-                print(rob_program_data.localLv1())
-                ERR_FILES = ERR_FILES + 1
+                # ================error==================
                 if rob_program_data.data['localLv1'] == '':
                     logWrite('【异常】' + rob_program_data.data['controllername'], '没有对应一级地点')
                     ERR_FILES = ERR_FILES + 1
                     continue
-
                 elif rob_program_data.data['localLv2'] == '':
                     logWrite('【异常】' + rob_program_data.data['controllername'], '没有对应二级地点')
                     ERR_FILES = ERR_FILES + 1
@@ -144,6 +49,9 @@ def getZipInfo():
                 rob_program_data.path['path_new'] = PATH_EXPORT_TO + '\\' + rob_program_data.data['localLv1'] + '\\' + \
                                                     rob_program_data.data['localLv2'] + '\\' + rob_program_data.data[
                                                         'localLv3']
+                json_str = json.dumps(rob_program_data, default=lambda obj: obj.__dict__)
+                print(json_str)
+                print(rob_program_data.localLv1())
 
                 # # 移动重整文件
                 # folder = os.path.exists(targetData[compare_name]['newpath'])
@@ -212,7 +120,7 @@ def backupState():
 def main():
     logWriteTitle('start')
     # 1.获取路径
-    getZipInfo()
+    RobotInfo()
     #
     # backupState()
 
