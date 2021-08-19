@@ -1,15 +1,22 @@
 # 配置变量
-import pathmap
+from pathmap import pathmap
 
 PATH_BASE = 'F:\\New folder'  # 根目录
 PATH_ORIGIN_BACKUP = PATH_BASE + '\\' + 'old'  # 原备份所在文件夹
 PATH_EXPORT_TO = PATH_BASE + '\\' + 'new'  # 重整后文件夹位置
+PATH_REPORT = PATH_BASE + '\\' + '备份报告'
+PATH_STANDARD = PATH_BASE
+FILE_STANDARD = 'BackUpStandard.xlsx'
+
 LOG_FILE_NAME = 'log.txt'
+PATH_TRASH = PATH_BASE + '\\' + '垃圾箱'
+LOG_TARSH_NAME = 'trash_log.txt'
 
 buStandard = {
     'filepath': PATH_BASE,  # 存储在根目录
     'filename': '机器人备份状态.xls'  # 定义名字
 }
+
 
 # 全局变量
 class RobProgramData:
@@ -27,6 +34,9 @@ class RobProgramData:
         self.data = {
             'controllername': '',
             'workstationname': '',
+        }
+        self.zipData = {
+            'total_files': 0,
         }
 
     def localLv1(self):
@@ -52,7 +62,6 @@ class RobProgramData:
             return ''
 
 
-
 # 表格
 SHEET_NAME = 'robot'
 COMPARE_COL = 5
@@ -66,3 +75,5 @@ Lv1 = 2
 TOTAL_FILES = 0  # 更目录下文件总数
 DEAL_FILES = 0
 ERR_FILES = 0
+MOVE_FILES = 0
+REPEAT_FILES = 0
