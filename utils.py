@@ -1,13 +1,27 @@
+import datetime
 import os
 import time
 
-from ini import PATH_BASE, LOG_FILE_NAME, PATH_TRASH, LOG_TARSH_NAME
+from ini import PATH_BASE, LOG_FILE_NAME, PATH_TRASH, LOG_TARSH_NAME, SH_LOG_TITLE
 
 
-def logWrite(file, msg, controllername):
-    log = open(file, 'a')
-    log.write(controllername + '[' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ']' + ' :' + msg + '\r\n')
-    log.close()
+def logWrite(wb, controllername, sort, msg):
+    sh = wb['log']
+    # row_now = sh.max_row
+    content = [controllername, datetime.datetime.now(), sort, msg]
+    sh.append(content)
+
+
+def createSheet(wb, sh_name, sh_index, sh_title):
+    '''
+    wb: workbook实例
+    sh_name:要创建的表格名字
+    sh_index:sheet的index
+    sh_title: sheet第一行标题，为列表
+    '''
+    wb.create_sheet(title=sh_name, index=sh_index)
+    sh_log = wb[sh_name]
+    sh_log.append(sh_title)
 
 
 def logTrash(controllername, msg):

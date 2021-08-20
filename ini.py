@@ -1,12 +1,18 @@
 # 配置变量
+import datetime
+
 from pathmap import pathmap
+
+time_now = datetime.datetime.now()
 
 PATH_BASE = 'F:\\New folder'  # 根目录
 PATH_ORIGIN_BACKUP = PATH_BASE + '\\' + 'old'  # 原备份所在文件夹
 PATH_EXPORT_TO = PATH_BASE + '\\' + 'new'  # 重整后文件夹位置
 PATH_REPORT = PATH_BASE + '\\' + '备份报告'
 PATH_STANDARD = PATH_BASE
-FILE_STANDARD = 'BackUpStandard.xlsx'
+FILE_STANDARD = 'BackUpStandard.xls'
+FILE_REPORT = '机器人备份报告' + str(time_now.year) + str(time_now.month) + str(time_now.day) + str(time_now.hour) + str(
+    time_now.minute) + '.xlsx'
 
 LOG_FILE_NAME = 'log.txt'
 PATH_TRASH = PATH_BASE + '\\' + '垃圾箱'
@@ -30,6 +36,7 @@ class RobProgramData:
             'title': '',
             'mtime': '',
             'format': '',
+
         }
         self.data = {
             'controllername': '',
@@ -37,6 +44,10 @@ class RobProgramData:
         }
         self.zipData = {
             'total_files': 0,
+            'isOK': '',
+            'file_folge_num': 0,
+            'file_makro_num': 0,
+            'file_up_num': 0,
         }
 
     def localLv1(self):
@@ -77,3 +88,10 @@ DEAL_FILES = 0
 ERR_FILES = 0
 MOVE_FILES = 0
 REPEAT_FILES = 0
+
+# 备份报告
+# log
+SH_ROB_BACKUP_OV = ['id', '部门', '车间', '区域', '线体', '工位', '创建时间', '大小', '是否损坏', '文件总是']
+SH_ROB_BACKUP_ANA = ['id', '部门', '车间', '区域', '线体', '工位', '总文件数']
+SH_LOG_TITLE = ['工位', '时间', '警告等级', '警告内容']
+SH_ZIP_LOG_TITLE = ['工位', '时间', '警告等级', '警告内容']
