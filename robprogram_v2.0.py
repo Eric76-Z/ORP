@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import time
 import xml.dom.minidom
@@ -23,10 +24,11 @@ def RobotInfo(SUM, wb):
     rob_program_data_json = {}
     for root, dirs, files in os.walk(PATH_ORIGIN_BACKUP):
         for name in files:
-            if name.endswith('.zip'):
+            originpath = os.path.join(root, name)
+            if zipfile.is_zipfile(originpath):
                 rob_program_data = RobProgramData()
                 SUM['total_files'] = SUM['total_files'] + 1
-                originpath = os.path.join(root, name)
+
                 # ================path==================
                 rob_program_data.path['path_origin'] = originpath  # 原始路径
                 # ================meta==================
@@ -56,9 +58,15 @@ def RobotInfo(SUM, wb):
                     logWrite(wb=wb, controllername=rob_program_data.data['controllername'], sort='报错', msg='没有对应三级地点')
                     SUM['err_files'] = SUM['err_files'] + 1
                     continue
+
                 rob_program_data.path['path_new'] = PATH_EXPORT_TO + '\\' + rob_program_data.data['localLv1'] + '\\' + \
                                                     rob_program_data.data['localLv2'] + '\\' + rob_program_data.data[
                                                         'localLv3'] + '\\' + name
+                rob_program_data.path['path_new_path'] = PATH_EXPORT_TO + '\\' + rob_program_data.data[
+                    'localLv1'] + '\\' + \
+                                                         rob_program_data.data['localLv2'] + '\\' + \
+                                                         rob_program_data.data[
+                                                             'localLv3']
 
                 # print(int(rob_program_data.meta['size'].split('.')[0]))
                 # 判断rob_program_data中是否已有这个工位
@@ -128,8 +136,10 @@ def RobotInfo(SUM, wb):
                 analysisZip(rob_program_data, wb=wb)
                 # print('========================解析机器人备份--end========================')
                 # 添加入rob_program_data_json
-
                 rob_program_data_json[rob_program_data.data['workstationname']] = rob_program_data
+            else:
+                msg = '备份可能损坏!!!源路径为：' + originpath + ';'
+                logWrite(wb=wb, controllername=name, sort='警告', msg=msg)
     with open('robot_data_json.json', "w", encoding='utf-8') as f:
         f.write(json.dumps(rob_program_data_json, default=lambda obj: obj.__dict__, indent=4, ensure_ascii=False))
         f.close()
@@ -141,50 +151,59 @@ def backupOverview(wb, SUM):
     sh_standard = book_standard.sheet_by_name('RobStandard')
     nrows = sh_standard.nrows
     sh = wb['机器人备份总览']
-    # content = []
     with open('robot_data_json.json', 'r', encoding='utf-8') as f:
         info_dict = json.load(f)
         for i in range(1, nrows):
-            # print(sh_standard.cell_value(i, 5))
             depart = sh_standard.cell_value(i, 1)
             localLv1 = sh_standard.cell_value(i, 2)
             localLv2 = sh_standard.cell_value(i, 3)
             localLv3 = sh_standard.cell_value(i, 4)
-            create_time = ''
-            size = ''
-            isOK = ''
+            create_time = 'null'
+            size = 'null'
+            try:
+                state = info_dict[sh_standard.cell_value(i, 5)]['zipData']['state']
+            except:
+                state = '未备份'
             totalFiles = 0
+            makro_num = 0
+            folge_num = 0
+            up_num = 0
+            serial_number = 'null'
+            robot_type = 'null'
+            mames_offsets = 'null'
+            version = 'null'
+            tech_packs = 'null'
+            is_axis_7 = 'null'
+            E1 = 'null'
+            E2 = 'null'
+            is_news = 'null'
             if sh_standard.cell_value(i, 5) in info_dict:
                 localLv1 = info_dict[sh_standard.cell_value(i, 5)]['data']['localLv1']
                 localLv2 = info_dict[sh_standard.cell_value(i, 5)]['data']['localLv2']
                 localLv3 = info_dict[sh_standard.cell_value(i, 5)]['data']['localLv3']
                 create_time = info_dict[sh_standard.cell_value(i, 5)]['meta']['mtime']
                 size = info_dict[sh_standard.cell_value(i, 5)]['meta']['size']
-                isOK = info_dict[sh_standard.cell_value(i, 5)]['zipData']['isOK']
                 totalFiles = info_dict[sh_standard.cell_value(i, 5)]['zipData']['total_files']
-            content = [sh_standard.cell_value(i, 0), depart, localLv1, localLv2, localLv3, sh_standard.cell_value(i, 5),
-                       create_time, size, isOK, totalFiles]
-            sh.append(content)
-
-
-def Reforming(SUM):
-    ## 移动重整文件
-    ## 读取json文件
-    with open('robot_data_json.json', 'r', encoding='utf-8') as f:
-        info_dict = json.load(f)
-        for dict in info_dict:
-            folder = os.path.exists(info_dict[dict]['path']['path_new'])
-            if not folder:  # 判断是否存在文件夹如果不存在则创建为文件夹
-                os.makedirs(info_dict[dict]['path']['path_new'])  # makedirs 创建文件时如果路径不存在会创建这个路径
+                folge_num = info_dict[sh_standard.cell_value(i, 5)]['zipData']['file_folge_num']
+                makro_num = info_dict[sh_standard.cell_value(i, 5)]['zipData']['file_makro_num']
+                up_num = info_dict[sh_standard.cell_value(i, 5)]['zipData']['file_up_num']
+                if info_dict[sh_standard.cell_value(i, 5)]['zipData']['state'] == '备份完好':
+                    serial_number = info_dict[sh_standard.cell_value(i, 5)]['zipData']['serial_number']
+                    robot_type = info_dict[sh_standard.cell_value(i, 5)]['zipData']['robot_type']
+                    mames_offsets = info_dict[sh_standard.cell_value(i, 5)]['zipData']['mames_offsets']
+                    version = info_dict[sh_standard.cell_value(i, 5)]['zipData']['version']
+                    tech_packs = info_dict[sh_standard.cell_value(i, 5)]['zipData']['tech_packs']
+                    is_axis_7 = info_dict[sh_standard.cell_value(i, 5)]['zipData']['is_axis_7']
+                    E1 = info_dict[sh_standard.cell_value(i, 5)]['zipData']['E1']
+                    E2 = info_dict[sh_standard.cell_value(i, 5)]['zipData']['E2']
             else:
-                pass
-            if not os.path.exists(info_dict[dict]['path']['path_new']):
-                SUM['move_files'] = SUM['move_files'] + 1
-                shutil.copy2(info_dict[dict]['path']['path_origin'], info_dict[dict]['path']['path_new'])
-            else:
-                SUM['exists_files'] = SUM['exists_files'] + 1
-                continue
-    print(SUM)
+                is_news = '新工位'
+
+            content_1 = [sh_standard.cell_value(i, 0), depart, localLv1, localLv2, localLv3,
+                         sh_standard.cell_value(i, 5),
+                         create_time, size, state, totalFiles, folge_num, makro_num, up_num, serial_number, robot_type,
+                         mames_offsets, version, tech_packs, is_axis_7, E1, E2, is_news]
+            sh.append(content_1)
 
 
 def analysisZip(rob_program_data, wb):
@@ -194,73 +213,81 @@ def analysisZip(rob_program_data, wb):
         try:
             for file in filezip.namelist():
                 if (file.split('/')[-1].endswith('.src')):
-                    if (file.split('/')[-1].startswith('Folge')):
+                    if (file.split('/')[-1].lower().startswith('folge')):
                         rob_program_data.zipData['file_folge_num'] = rob_program_data.zipData['file_folge_num'] + 1
-                    elif (file.split('/')[-1].startswith('makro')):
+                    elif (file.split('/')[-1].lower().startswith('makro')):
                         rob_program_data.zipData['file_makro_num'] = rob_program_data.zipData['file_makro_num'] + 1
-                    elif (file.split('/')[-1].startswith('up')):
-                        rob_program_data.zipData['up'] = rob_program_data.zipData['up'] + 1
+                    elif (file.split('/')[-1].lower().startswith('up')):
+                        rob_program_data.zipData['file_up_num'] = rob_program_data.zipData['file_up_num'] + 1
                 elif file.split('/')[-1] == 'RobotInfo.xml':
-                    dom = xml.dom.minidom.parse(file)
+                    RobotInfoXml = filezip.open(file)
+                    dom = xml.dom.minidom.parse(RobotInfoXml)
                     root = dom.documentElement
-                    print(root.nodeName)
-            filezip.close()
-            rob_program_data.zipData['isOK'] = 'OK'
+                    rob_program_data.zipData['serial_number'] = \
+                        root.getElementsByTagName('SerialNumber')[0].childNodes[
+                            0].data
+                    rob_program_data.zipData['robot_type'] = root.getElementsByTagName('RobotType')[0].childNodes[
+                        0].data
+                    rob_program_data.zipData['mames_offsets'] = root.getElementsByTagName('MamesOffsets')[
+                        0].getAttribute('Timestamp')
+                elif file.split('/')[-1] == 'am.ini':
+                    am_ini = filezip.open(file)
+                    mystr = str(am_ini.read())
+                    rob_program_data.zipData['version'] = \
+                        re.findall(r'Version=(.+)\[', mystr)[0].split('\\r\\n')[0]
+                    rob_program_data.zipData['tech_packs'] = re.findall(r'TechPacks=(.+)\|', mystr)[0]
+                elif file.split('/')[-1] == 'NextGenDriveTech.xml':
+                    RobotInfoXml = filezip.open(file)
+                    dom = xml.dom.minidom.parse(RobotInfoXml)
+                    root = dom.documentElement
+                    if root.getElementsByTagName('Axis').length == 7:
+                        rob_program_data.zipData['is_axis_7'] = '7轴'
+                    else:
+                        rob_program_data.zipData['is_axis_7'] = '非7轴'
+                elif (file.split('/')[-1] == 'E1.xml' or file.split('/')[-1] == 'E2.xml') and file.split('/')[
+                    -2] == 'SimuAxis':
+                    RobotInfoXml = filezip.open(file)
+                    dom = xml.dom.minidom.parse(RobotInfoXml)
+                    root = dom.documentElement
+                    if file.split('/')[-1] == 'E1.xml':
+                        rob_program_data.zipData['E1'] = \
+                            root.getElementsByTagName('Machine')[0].getAttribute('Name')
+                    else:
+                        rob_program_data.zipData['E1'] = 'null'
+                    if file.split('/')[-1] == 'E2.xml':
+                        rob_program_data.zipData['E2'] = \
+                            root.getElementsByTagName('Machine')[0].getAttribute('Name')
+                    else:
+                        rob_program_data.zipData['E2'] = 'null'
         except Exception as e:
             print(rob_program_data.path['path_origin'] + str(e))
-
+        rob_program_data.zipData['state'] = '备份完好'  # zip文件完好
+        filezip.close()
     except Exception as e:
         msg = '备份可能损坏!!!源路径为：' + rob_program_data.path['path_origin'] + ';' + '新路径为:' + rob_program_data.path[
             'path_new']
         logWrite(wb=wb, controllername=rob_program_data.data['controllername'], sort='警告', msg=msg)
-        rob_program_data.zipData['isOK'] = 'NOK'
+        rob_program_data.zipData['state'] = '备份损坏'
 
 
-def backupState():
-    standard_filepath = buStandard['filepath'] + '\\' + buStandard['filename']
-    book_rd = xlrd.open_workbook(standard_filepath, formatting_info=True)
-    sheet_rd = book_rd.sheet_by_index(0)
-    book_wt = copy(book_rd)
-    sheet_wt = book_wt.get_sheet(SHEET_NAME)
-    nrows = sheet_rd.nrows
-    nrows_compare = nrows
-    global DEAL_FILES
-    for root, dirs, files in os.walk(PATH_EXPORT_TO):
-        for name in files:
-            DEAL_FILES = DEAL_FILES + 1
-            rob_program_data.controllername = name.split('.zip')[0]
-            workstationname = rob_program_data.controllername[-7:].upper()  # 截取的 eg.k2a3a131s460r04 后7位
-            if isAll == True:
-                compare_name = rob_program_data.controllername
+def Reforming(SUM):
+    ## 移动重整文件
+    ## 读取json文件
+    with open('robot_data_json.json', 'r', encoding='utf-8') as f:
+        info_dict = json.load(f)
+        for dict in info_dict:
+            folder = os.path.exists(info_dict[dict]['path']['path_new_path'])
+            if not folder:  # 判断是否存在文件夹如果不存在则创建为文件夹
+                os.makedirs(info_dict[dict]['path']['path_new_path'])  # makedirs 创建文件时如果路径不存在会创建这个路径
             else:
-                compare_name = workstationname
-            flag = True
-
-            for i in range(nrows):
-                lng = sheet_rd.cell(i - 1, COMPARE_COL).value
-                if lng == compare_name:
-                    sheet_wt.write(i - 1, COMMIT_COL, label='已备份')
-                    sheet_wt.write(i - 1, TIME_COL, label=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-                    flag = False
-                    break
-            if flag == True:
-                sheet_wt.write(nrows_compare, COMPARE_COL - 3, targetData[compare_name]['Lv1'])
-                sheet_wt.write(nrows_compare, COMPARE_COL - 2,
-                               pathmap[rob_program_data.controllername[2:6].lower()]['Lv2'])
-                sheet_wt.write(nrows_compare, COMPARE_COL - 1,
-                               pathmap[rob_program_data.controllername[2:6].lower()]['Lv3'])
-                sheet_wt.write(nrows_compare, COMPARE_COL, compare_name)
-                sheet_wt.write(nrows_compare, COMMIT_COL, label='新工位')
-                sheet_wt.write(nrows_compare, TIME_COL, label=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-                nrows_compare = nrows_compare + 1
-    logWriteTitle('总结')
-    log = open(PATH_BASE + '\\' + LOG_FILE_NAME, 'a')
-    log.write(
-        '备份总数: ' + str(SUM['total_files']) + '        已处理: ' + str(DEAL_FILES) + '         异常: ' + str(
-            SUM['err_files']) + '\r\n')
-    log.close()
-    logWriteTitle('end')
-    book_wt.save(PATH_BASE + '\\' + time.strftime("%Y%m%d", time.localtime()) + '机器人备份情况.xls')
+                pass
+            if not os.path.exists(info_dict[dict]['path']['path_new']):
+                SUM['move_files'] = SUM['move_files'] + 1
+                shutil.copy2(info_dict[dict]['path']['path_origin'], info_dict[dict]['path']['path_new'])
+            else:
+                SUM['exists_files'] = SUM['exists_files'] + 1
+                continue
+    print(SUM)
 
 
 def main():
@@ -296,7 +323,6 @@ def main():
     print('========================机器人overview--start========================')
     backupOverview(wb, SUM)
     print('========================机器人overview--end========================')
-    #
     # logWriteTitle(PATH_BASE + '\\' + LOG_FILE_NAME, 'end')
     # logWriteTitle(PATH_TRASH + '\\' + LOG_TARSH_NAME, 'end')
     #

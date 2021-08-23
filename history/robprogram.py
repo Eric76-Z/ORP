@@ -13,7 +13,7 @@ from pathmap import pathmap
 # 预设变量
 BASE_PATH = 'F:\\New folder'
 PATHRB = BASE_PATH + '\\' + 'old'  # 原备份所在文件夹
-PATH_EXPORT = BASE_PATH + '\\' + 'new'  # 重整后文件夹位置
+PATH_EXPORT = BASE_PATH + '\\' + '机器人备份'  # 重整后文件夹位置
 LOG_FILE_NAME = 'log.txt'
 
 buStandard = {
