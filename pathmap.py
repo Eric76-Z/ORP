@@ -16,6 +16,10 @@ pathmap = {
         'Lv2': 'UB',
         'Lv3': 'GEO2',
     },
+    'urhi': {
+        'Lv2': 'UB',
+        'Lv3': 'GEO2',
+    },
     'ltvl': {
         'Lv2': 'UB',
         'Lv3': 'LTV',

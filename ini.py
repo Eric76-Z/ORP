@@ -5,7 +5,7 @@ from pathmap import pathmap
 
 time_now = datetime.datetime.now()
 
-PATH_BASE = 'F:\\New folder'  # 根目录
+PATH_BASE = 'F:\\机器人备份'  # 根目录
 PATH_ORIGIN_BACKUP = PATH_BASE + '\\' + 'old'  # 原备份所在文件夹
 PATH_EXPORT_TO = PATH_BASE + '\\' + 'new'  # 重整后文件夹位置
 PATH_REPORT = PATH_BASE + '\\' + '备份报告' + '\\' + str(time_now.year) + str(time_now.month) + str(time_now.day)
