@@ -276,6 +276,7 @@ def analysisZip(rob_program_data, wb):
                             root.getElementsByTagName('Machine')[0].getAttribute('Name')
                     else:
                         rob_program_data.zipData['E2'] = 'null'
+
         except Exception as e:
             print(rob_program_data.path['path_origin'] + str(e))
         rob_program_data.zipData['state'] = '备份完好'  # zip文件完好
