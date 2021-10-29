@@ -34,6 +34,7 @@ def logWriteTitle(file, msg):
     log.close()
 
 
+
 # 　　'''把时间戳转化为时间: 1479264792 to 2016-11-16 10:53:12'''
 def TimeStampToTime(timestamp):
     timeStruct = time.localtime(timestamp)

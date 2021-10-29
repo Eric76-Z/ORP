@@ -131,7 +131,7 @@ def RobotInfo(SUM, wb):
                         rob_program_data.meta['size'].split(' ')[0]) < 10:
                     msg = '备份的size大于40M或者小于10M！为：' + rob_program_data.meta['size']
                     logWrite(wb=wb, controllername=rob_program_data.data['controllername'], sort='提示', msg=msg)
-                    continue
+                    # continue
                 # print('========================解析机器人备份--start========================')
                 analysisZip(rob_program_data, wb=wb)
                 # print('========================解析机器人备份--end========================')
@@ -263,20 +263,25 @@ def analysisZip(rob_program_data, wb):
                         rob_program_data.zipData['is_axis_7'] = '非7轴'
                 elif (file.split('/')[-1] == 'E1.xml' or file.split('/')[-1] == 'E2.xml') and file.split('/')[
                     -2] == 'SimuAxis':
+
                     RobotInfoXml = filezip.open(file)
                     dom = xml.dom.minidom.parse(RobotInfoXml)
                     root = dom.documentElement
                     if file.split('/')[-1] == 'E1.xml':
-                        rob_program_data.zipData['E1'] = \
-                            root.getElementsByTagName('Machine')[0].getAttribute('Name')
-                    else:
-                        rob_program_data.zipData['E1'] = 'null'
-                    if file.split('/')[-1] == 'E2.xml':
-                        rob_program_data.zipData['E2'] = \
-                            root.getElementsByTagName('Machine')[0].getAttribute('Name')
-                    else:
-                        rob_program_data.zipData['E2'] = 'null'
+                        try:
+                            rob_program_data.zipData['E1'] = \
+                                root.getElementsByTagName('Machine')[0].getAttribute('Name')
+                        except:
+                            rob_program_data.zipData['E1'] = 'null'
+                    elif file.split('/')[-1] == 'E2.xml':
+                        try:
+                            rob_program_data.zipData['E2'] = \
+                                root.getElementsByTagName('Machine')[0].getAttribute('Name')
+                        except:
+                            rob_program_data.zipData['E2'] = 'null'
 
+            if rob_program_data.data['workstationname'] == '5330R07':
+                print(rob_program_data.zipData)
         except Exception as e:
             print(rob_program_data.path['path_origin'] + str(e))
         rob_program_data.zipData['state'] = '备份完好'  # zip文件完好

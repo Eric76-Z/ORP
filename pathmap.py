@@ -53,7 +53,7 @@ pathmap = {
         'Lv2': 'UB',
         'Lv3': 'UB2.2',
     },
-    'usai':{
+    'usai': {
         'Lv2': 'UB',
         'Lv3': 'GEO2',
     },
@@ -91,6 +91,10 @@ pathmap = {
         'Lv2': 'ABT',
         'Lv3': 'THIR',
     },
+    'thr2': {
+        'Lv2': 'ABT',
+        'Lv3': 'THIR',
+    },  # 临时添加
     'tvor': {
         'Lv2': 'ABT',
         'Lv3': 'TVOR',
