@@ -54,6 +54,8 @@ class RobProgramData:
             'version': 'null',
             'tech_packs': 'null',
             'is_axis_7': 'null',
+            'seven_axis': 'null',
+            'other_E7': 'null',
             'E1': 'null',
             'E2': 'null'
         }
@@ -102,7 +104,7 @@ REPEAT_FILES = 0
 # 备份报告
 # log
 SH_ROB_BACKUP_OV = ['id', '部门', '车间', '区域', '线体', '工位', '创建时间', '大小', '是否损坏', '文件总数', 'folge文件数', 'makro文件数', 'up文件数',
-                    '序列号', '机器人型号', '投入运行时间', '系统版本', '安装包', '七轴', 'E1', 'E2', '新工位']
+                    '序列号', '机器人型号', '投入运行时间', '系统版本', '安装包', '七轴', 'E1', 'E2', '七轴导轨', '其他E7', '新工位']
 SH_ROB_BACKUP_ANA = ['id', '部门', '车间', '区域', '线体', '工位', '总文件数']
 SH_LOG_TITLE = ['工位', '时间', '警告等级', '警告内容']
 SH_ZIP_LOG_TITLE = ['工位', '时间', '警告等级', '警告内容']

@@ -214,12 +214,14 @@ def backupOverview(wb, SUM):
                     is_axis_7 = info_dict[workstations[i]]['zipData']['is_axis_7']
                     E1 = info_dict[workstations[i]]['zipData']['E1']
                     E2 = info_dict[workstations[i]]['zipData']['E2']
+                    seven_axis = info_dict[workstations[i]]['zipData']['seven_axis']
+                    other_E7 = info_dict[workstations[i]]['zipData']['other_E7']
                 if i >= old_len:
                     is_news = '新工位'
             content_1 = [i + 1, depart, localLv1, localLv2, localLv3,
                          workstations[i],
                          create_time, size, state, totalFiles, folge_num, makro_num, up_num, serial_number, robot_type,
-                         mames_offsets, version, tech_packs, is_axis_7, E1, E2, is_news]
+                         mames_offsets, version, tech_packs, is_axis_7, E1, E2, seven_axis, other_E7, is_news]
             sh.append(content_1)
 
 
@@ -253,35 +255,42 @@ def analysisZip(rob_program_data, wb):
                     rob_program_data.zipData['version'] = \
                         re.findall(r'Version=(.+)\[', mystr)[0].split('\\r\\n')[0]
                     rob_program_data.zipData['tech_packs'] = re.findall(r'TechPacks=(.+)\|', mystr)[0]
-                elif file.split('/')[-1] == 'NextGenDriveTech.xml':
-                    RobotInfoXml = filezip.open(file)
-                    dom = xml.dom.minidom.parse(RobotInfoXml)
-                    root = dom.documentElement
-                    if root.getElementsByTagName('Axis').length == 7:
-                        rob_program_data.zipData['is_axis_7'] = '7轴'
-                    else:
-                        rob_program_data.zipData['is_axis_7'] = '非7轴'
+                # elif file.split('/')[-1] == 'NextGenDriveTech.xml':
+                #     RobotInfoXml = filezip.open(file)
+                #     dom = xml.dom.minidom.parse(RobotInfoXml)
+                #     root = dom.documentElement
+                #     if root.getElementsByTagName('Axis').length == 7:
+                #         rob_program_data.zipData['is_axis_7'] = '7轴'
+                #     else:
+                #         rob_program_data.zipData['is_axis_7'] = '非7轴'
                 elif (file.split('/')[-1] == 'E1.xml' or file.split('/')[-1] == 'E2.xml') and file.split('/')[
                     -2] == 'SimuAxis':
-
                     RobotInfoXml = filezip.open(file)
                     dom = xml.dom.minidom.parse(RobotInfoXml)
                     root = dom.documentElement
                     if file.split('/')[-1] == 'E1.xml':
-                        try:
-                            rob_program_data.zipData['E1'] = \
-                                root.getElementsByTagName('Machine')[0].getAttribute('Name')
-                        except:
-                            rob_program_data.zipData['E1'] = 'null'
+                        rob_program_data.zipData['E1'] = \
+                            root.getElementsByTagName('Machine')[0].getAttribute('Name')
+                        rob_program_data.zipData['is_axis_7'] = '7轴'
+                        if rob_program_data.zipData['E1'].startswith('#KR'):
+                            rob_program_data.zipData['other_E7'] = rob_program_data.zipData['E1']
+                        else:
+                            rob_program_data.zipData['seven_axis'] = rob_program_data.zipData['E1']
                     elif file.split('/')[-1] == 'E2.xml':
-                        try:
-                            rob_program_data.zipData['E2'] = \
-                                root.getElementsByTagName('Machine')[0].getAttribute('Name')
-                        except:
-                            rob_program_data.zipData['E2'] = 'null'
+                        rob_program_data.zipData['E2'] = \
+                            root.getElementsByTagName('Machine')[0].getAttribute('Name')
+                        rob_program_data.zipData['is_axis_7'] = '7轴'
+                        if rob_program_data.zipData['E2'].startswith('#KR'):
+                            rob_program_data.zipData['other_E7'] = rob_program_data.zipData['E2']
+                        else:
+                            rob_program_data.zipData['seven_axis'] = rob_program_data.zipData['E2']
+                if rob_program_data.zipData['E1'] != 'null' or rob_program_data.zipData['E2'] != 'null':
+                    rob_program_data.zipData['is_axis_7'] = '7轴'
+                else:
+                    rob_program_data.zipData['is_axis_7'] = '非7轴'
 
-            if rob_program_data.data['workstationname'] == '5330R07':
-                print(rob_program_data.zipData)
+            # if rob_program_data.data['workstationname'] == '5330R07':
+            #     print(rob_program_data.zipData)
         except Exception as e:
             print(rob_program_data.path['path_origin'] + str(e))
         rob_program_data.zipData['state'] = '备份完好'  # zip文件完好
