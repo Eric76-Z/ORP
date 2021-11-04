@@ -28,7 +28,6 @@ def RobotInfo(SUM, wb):
             if zipfile.is_zipfile(originpath):
                 rob_program_data = RobProgramData()
                 SUM['total_files'] = SUM['total_files'] + 1
-
                 # ================path==================
                 rob_program_data.path['path_origin'] = originpath  # 原始路径
                 # ================meta==================
@@ -146,11 +145,10 @@ def RobotInfo(SUM, wb):
 
 
 def backupOverview(wb, SUM):
-    ## 读取json文件
+    # 读取json文件
     book_standard = xlrd.open_workbook(os.path.join(PATH_STANDARD, FILE_STANDARD), formatting_info=True)
     sh_standard = book_standard.sheet_by_name('RobStandard')
     nrows = sh_standard.nrows
-
     sh = wb['机器人备份总览']
 
     with open('robot_data_json.json', 'r', encoding='utf-8') as f:
@@ -255,14 +253,6 @@ def analysisZip(rob_program_data, wb):
                     rob_program_data.zipData['version'] = \
                         re.findall(r'Version=(.+)\[', mystr)[0].split('\\r\\n')[0]
                     rob_program_data.zipData['tech_packs'] = re.findall(r'TechPacks=(.+)\|', mystr)[0]
-                # elif file.split('/')[-1] == 'NextGenDriveTech.xml':
-                #     RobotInfoXml = filezip.open(file)
-                #     dom = xml.dom.minidom.parse(RobotInfoXml)
-                #     root = dom.documentElement
-                #     if root.getElementsByTagName('Axis').length == 7:
-                #         rob_program_data.zipData['is_axis_7'] = '7轴'
-                #     else:
-                #         rob_program_data.zipData['is_axis_7'] = '非7轴'
                 elif (file.split('/')[-1] == 'E1.xml' or file.split('/')[-1] == 'E2.xml') and file.split('/')[
                     -2] == 'SimuAxis':
                     RobotInfoXml = filezip.open(file)
@@ -339,9 +329,6 @@ def main():
     }
     createFolder(PATH_TRASH)
     createFolder(PATH_REPORT)
-    # logWriteTitle(PATH_BASE + '\\' + LOG_FILE_NAME, 'start')
-    # logWriteTitle(PATH_TRASH + '\\' + LOG_TARSH_NAME, 'start')
-    # wb =
     wb = Workbook(write_only=True)
     createSheet(wb=wb, sh_name='机器人备份总览', sh_index=1, sh_title=SH_ROB_BACKUP_OV)
     createSheet(wb=wb, sh_name='机器人备份分析', sh_index=2, sh_title=SH_ROB_BACKUP_ANA)
