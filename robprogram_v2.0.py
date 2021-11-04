@@ -2,13 +2,12 @@ import json
 import os
 import re
 import shutil
-import time
+
 import xml.dom.minidom
 import zipfile
 
 import xlrd
 from openpyxl import Workbook, load_workbook
-from xlutils.copy import copy
 
 from ini import RobProgramData, PATH_ORIGIN_BACKUP, PATH_EXPORT_TO, PATH_TRASH, LOG_TARSH_NAME, PATH_BASE, \
     LOG_FILE_NAME, PATH_REPORT, FILE_STANDARD, PATH_STANDARD, FILE_REPORT, SH_LOG_TITLE, SH_ROB_BACKUP_OV, \
@@ -67,7 +66,6 @@ def RobotInfo(SUM, wb):
                                                          rob_program_data.data[
                                                              'localLv3']
 
-                # print(int(rob_program_data.meta['size'].split('.')[0]))
                 # 判断rob_program_data中是否已有这个工位
                 if rob_program_data.data['workstationname'] in rob_program_data_json.keys():
                     SUM['repeat_files'] = SUM['repeat_files'] + 1
@@ -115,8 +113,6 @@ def RobotInfo(SUM, wb):
                         logWrite(wb=wb, controllername=rob_program_data.data['controllername'], sort='警告',
                                  msg='备份的创建时间过早，移动至垃圾箱！')
                         continue
-                else:
-                    pass
                 # 分析备份大小
                 SUM['avg_file_size'] = (SUM['avg_file_size'] * len(rob_program_data_json) + float(
                     rob_program_data.meta['size'].split(' ')[0])) / (len(
@@ -310,7 +306,6 @@ def Reforming(SUM):
             else:
                 SUM['exists_files'] = SUM['exists_files'] + 1
                 continue
-    print(SUM)
 
 
 def main():
