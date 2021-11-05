@@ -7,15 +7,15 @@ import xml.dom.minidom
 import zipfile
 
 import xlrd
-from openpyxl import Workbook, load_workbook
+from openpyxl import Workbook
 
-from ini import RobProgramData, PATH_ORIGIN_BACKUP, PATH_EXPORT_TO, PATH_TRASH, LOG_TARSH_NAME, PATH_BASE, \
-    LOG_FILE_NAME, PATH_REPORT, FILE_STANDARD, PATH_STANDARD, FILE_REPORT, SH_LOG_TITLE, SH_ROB_BACKUP_OV, \
-    SH_ROB_BACKUP_ANA
-from pathmap import pathmap
+from src.common.rob_program_backup_setting import RobProgramData, PATH_ORIGIN_BACKUP, PATH_EXPORT_TO, PATH_TRASH, \
+    PATH_REPORT, \
+    FILE_STANDARD, \
+    PATH_STANDARD, FILE_REPORT, SH_LOG_TITLE, SH_ROB_BACKUP_OV
 
 # 获取RobotProgram对象信息，并写入
-from utils import TimeStampToTime, logWrite, logWriteTitle, getFileSize, createFolder, createSheet
+from src.common.utils import TimeStampToTime, logWrite, getFileSize, createFolder, createSheet
 
 
 # 获取机器人数据
@@ -126,7 +126,6 @@ def RobotInfo(SUM, wb):
                         rob_program_data.meta['size'].split(' ')[0]) < 10:
                     msg = '备份的size大于40M或者小于10M！为：' + rob_program_data.meta['size']
                     logWrite(wb=wb, controllername=rob_program_data.data['controllername'], sort='提示', msg=msg)
-                    # continue
                 # print('========================解析机器人备份--start========================')
                 analysisZip(rob_program_data, wb=wb)
                 # print('========================解析机器人备份--end========================')
@@ -135,7 +134,7 @@ def RobotInfo(SUM, wb):
             else:
                 msg = '备份可能损坏!!!源路径为：' + originpath + ';'
                 logWrite(wb=wb, controllername=name, sort='警告', msg=msg)
-    with open('robot_data_json.json', "w", encoding='utf-8') as f:
+    with open('database/robot_data.json', "w", encoding='utf-8') as f:
         f.write(json.dumps(rob_program_data_json, default=lambda obj: obj.__dict__, indent=4, ensure_ascii=False))
         f.close()
 
@@ -146,8 +145,7 @@ def backupOverview(wb, SUM):
     sh_standard = book_standard.sheet_by_name('RobStandard')
     nrows = sh_standard.nrows
     sh = wb['机器人备份总览']
-
-    with open('robot_data_json.json', 'r', encoding='utf-8') as f:
+    with open('database/robot_data.json', 'r', encoding='utf-8') as f:
         info_dict = json.load(f)
         workstations = []
         for i in range(1, nrows):
@@ -156,10 +154,7 @@ def backupOverview(wb, SUM):
         for dict in info_dict:
             if dict not in workstations:
                 workstations.append(dict)
-        # new_len = len(workstations)
-        # print(workstations)
         for i in range(0, len(workstations)):
-            # print(i)
             try:
                 depart = sh_standard.cell_value(i + 1, 1)
                 localLv1 = sh_standard.cell_value(i + 1, 2)
@@ -217,7 +212,7 @@ def backupOverview(wb, SUM):
                          create_time, size, state, totalFiles, folge_num, makro_num, up_num, serial_number, robot_type,
                          mames_offsets, version, tech_packs, is_axis_7, E1, E2, seven_axis, other_E7, is_news]
             sh.append(content_1)
-
+    # print(SUM)
 
 def analysisZip(rob_program_data, wb):
     try:
@@ -292,7 +287,7 @@ def analysisZip(rob_program_data, wb):
 def Reforming(SUM):
     ## 移动重整文件
     ## 读取json文件
-    with open('robot_data_json.json', 'r', encoding='utf-8') as f:
+    with open('database/robot_data.json', 'r', encoding='utf-8') as f:
         info_dict = json.load(f)
         for dict in info_dict:
             folder = os.path.exists(info_dict[dict]['path']['path_new_path'])
@@ -326,7 +321,6 @@ def main():
     createFolder(PATH_REPORT)
     wb = Workbook(write_only=True)
     createSheet(wb=wb, sh_name='机器人备份总览', sh_index=1, sh_title=SH_ROB_BACKUP_OV)
-    createSheet(wb=wb, sh_name='机器人备份分析', sh_index=2, sh_title=SH_ROB_BACKUP_ANA)
     createSheet(wb=wb, sh_name='log', sh_index=3, sh_title=SH_LOG_TITLE)
 
     print('========================获取机器人数据--start========================')

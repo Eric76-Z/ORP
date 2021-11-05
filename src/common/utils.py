@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 
-from ini import PATH_BASE, LOG_FILE_NAME, PATH_TRASH, LOG_TARSH_NAME, SH_LOG_TITLE
+from src.common.rob_program_backup_setting import PATH_TRASH, LOG_TARSH_NAME
 
 
 def logWrite(wb, controllername, sort, msg):
@@ -32,7 +32,6 @@ def logWriteTitle(file, msg):
     log = open(file, 'a')
     log.write('==============================' + msg + '==============================' + '\r\n')
     log.close()
-
 
 
 # 　　'''把时间戳转化为时间: 1479264792 to 2016-11-16 10:53:12'''

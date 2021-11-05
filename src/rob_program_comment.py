@@ -5,9 +5,9 @@ import zipfile
 
 from openpyxl import Workbook
 
-from ini import PATH_ORIGIN_BACKUP, RobProgramComment, PATH_EXPORT_TO, PATH_REPORT, SH_ROB_COMMENT_ANALYSE, \
-    ROB_COMMENT_REPORT, PATH_PROGRAM
-from utils import TimeStampToTime, getFileSize, logWrite, createFolder, createSheet
+from src.common.setting import RobProgramComment, PATH_REPORT, SH_ROB_COMMENT_ANALYSE, \
+    ROB_COMMENT_REPORT, PATH_PROGRAM, ROB_COMMENT_REPORT_BASE
+from src.common.utils import TimeStampToTime, getFileSize, logWrite, createFolder, createSheet
 
 
 # 1、读取机器人zip相关性息
@@ -42,13 +42,12 @@ def RobotInfo(SUM, wb):
             else:
                 msg = '备份可能损坏!!!源路径为：' + originpath + ';'
                 logWrite(wb=wb, controllername=name, sort='警告', msg=msg)
-    with open('robot_comment.json', "w", encoding='utf-8') as f:
+    with open('database/robot_comment.json', "w", encoding='utf-8') as f:
         f.write(json.dumps(rob_program_comment_json, default=lambda obj: obj.__dict__, indent=4, ensure_ascii=False))
         f.close()
 
 
 def analysisZip(rob_program_comment, wb):
-    print('wwwww')
     try:
         filezip = zipfile.ZipFile(rob_program_comment.path['path_origin'], "r")
         rob_program_comment.zipData['total_files'] = len(filezip.namelist())
@@ -116,7 +115,7 @@ def main():
     #
     # # 4.导出数据
     # exportfileData()
-    wb.save(os.path.join(PATH_REPORT, ROB_COMMENT_REPORT))
+    wb.save(os.path.join(ROB_COMMENT_REPORT_BASE, ROB_COMMENT_REPORT))
 
 
 if __name__ == "__main__":

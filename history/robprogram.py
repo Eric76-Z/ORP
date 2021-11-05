@@ -2,13 +2,11 @@
 import os
 import shutil
 import time
-import zipfile
 
 import xlrd
-import xlwt
 from xlutils.copy import copy
 
-from pathmap import pathmap
+from src.common.pathmap import pathmap
 
 # 预设变量
 BASE_PATH = 'F:\\New folder'
