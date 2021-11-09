@@ -4,5 +4,5 @@ from src.common.pathmap import pathmap
 
 time_now = datetime.datetime.now()
 
-PATH_BASE = 'G:\\机器人备份'  # 根目录
+PATH_BASE = 'F:\\机器人备份'  # 根目录
 

@@ -11,24 +11,32 @@ SH_ROB_COMMENT_ANALYSE = ['id', '部门', '车间', '区域', '线体', '工位'
                           'up文件数',
                           '序列号', '机器人型号', '投入运行时间', '系统版本', '安装包', '七轴', 'E1', 'E2', '七轴导轨', '其他E7', '新工位']
 
-ROB_COMMENT_REPORT_BASE = PATH_BASE + '\\' + '机器人注释解析报告' + '\\' + str(time_now.year) + str(time_now.month) + str(
+ROB_COMMENT_OVERVIEW_REPORT_BASE = PATH_BASE + '\\' + '机器人注释解析报告总览' + '\\' + str(time_now.year) + str(
+    time_now.month) + str(
     time_now.day)
-ROB_COMMENT_REPORT = '机器人注释解析报告' + str(time_now.year) + str(time_now.month) + str(time_now.day) + str(
+ROB_COMMENT_OVERVIEW_REPORT = '机器人注释解析报告' + str(time_now.year) + str(time_now.month) + str(time_now.day) + str(
+    time_now.hour) + str(
+    time_now.minute) + str(time_now.second) + '.xlsx'
+
+ROB_COMMENT_ANALYSE_REPORT_BASE = PATH_BASE + '\\' + '机器人注释解析详情' + '\\' + str(time_now.year) + str(
+    time_now.month) + str(
+    time_now.day)
+ROB_COMMENT_ANALYSE_REPORT = '机器人注释解析详情' + str(time_now.year) + str(time_now.month) + str(time_now.day) + str(
     time_now.hour) + str(
     time_now.minute) + str(time_now.second) + '.xlsx'
 
 
 class RobProgramComment:
     def __init__(self):
-        self.sort = '机器人程序'
+        self.sort = '机器人注释'
         self.path = {
             'path_origin': '',
-            'path_new': ''
         }
         self.meta = {
             'title': '',
             'mtime': '',
             'format': '',
+            'size': '',
 
         }
         self.data = {
@@ -36,6 +44,7 @@ class RobProgramComment:
             'workstationname': '',
         }
         self.zipData = {
+            'create_time': '',
             'total_files': 0,
             'state': 'null',
             'file_folge_num': 0,

@@ -139,81 +139,6 @@ def RobotInfo(SUM, wb):
         f.close()
 
 
-def backupOverview(wb, SUM):
-    # 读取json文件
-    book_standard = xlrd.open_workbook(os.path.join(PATH_STANDARD, FILE_STANDARD), formatting_info=True)
-    sh_standard = book_standard.sheet_by_name('RobStandard')
-    nrows = sh_standard.nrows
-    sh = wb['机器人备份总览']
-    with open('database/robot_data.json', 'r', encoding='utf-8') as f:
-        info_dict = json.load(f)
-        workstations = []
-        for i in range(1, nrows):
-            workstations.append(sh_standard.cell_value(i, 5))
-        old_len = len(workstations)
-        for dict in info_dict:
-            if dict not in workstations:
-                workstations.append(dict)
-        for i in range(0, len(workstations)):
-            try:
-                depart = sh_standard.cell_value(i + 1, 1)
-                localLv1 = sh_standard.cell_value(i + 1, 2)
-                localLv2 = sh_standard.cell_value(i + 1, 3)
-                localLv3 = sh_standard.cell_value(i + 1, 4)
-            except:
-                depart = 'null'
-                localLv1 = 'null'
-                localLv2 = 'null'
-                localLv3 = 'null'
-            create_time = 'null'
-            size = 'null'
-            try:
-                state = info_dict[workstations[i]]['zipData']['state']
-            except:
-                state = '未备份'
-            totalFiles = 0
-            makro_num = 0
-            folge_num = 0
-            up_num = 0
-            serial_number = 'null'
-            robot_type = 'null'
-            mames_offsets = 'null'
-            version = 'null'
-            tech_packs = 'null'
-            is_axis_7 = 'null'
-            E1 = 'null'
-            E2 = 'null'
-            is_news = 'null'
-            if workstations[i] in info_dict or i >= old_len:
-                localLv1 = info_dict[workstations[i]]['data']['localLv1']
-                localLv2 = info_dict[workstations[i]]['data']['localLv2']
-                localLv3 = info_dict[workstations[i]]['data']['localLv3']
-                create_time = info_dict[workstations[i]]['meta']['mtime']
-                size = info_dict[workstations[i]]['meta']['size']
-                totalFiles = info_dict[workstations[i]]['zipData']['total_files']
-                folge_num = info_dict[workstations[i]]['zipData']['file_folge_num']
-                makro_num = info_dict[workstations[i]]['zipData']['file_makro_num']
-                up_num = info_dict[workstations[i]]['zipData']['file_up_num']
-                if info_dict[workstations[i]]['zipData']['state'] == '备份完好':
-                    serial_number = info_dict[workstations[i]]['zipData']['serial_number']
-                    robot_type = info_dict[workstations[i]]['zipData']['robot_type']
-                    mames_offsets = info_dict[workstations[i]]['zipData']['mames_offsets']
-                    version = info_dict[workstations[i]]['zipData']['version']
-                    tech_packs = info_dict[workstations[i]]['zipData']['tech_packs']
-                    is_axis_7 = info_dict[workstations[i]]['zipData']['is_axis_7']
-                    E1 = info_dict[workstations[i]]['zipData']['E1']
-                    E2 = info_dict[workstations[i]]['zipData']['E2']
-                    seven_axis = info_dict[workstations[i]]['zipData']['seven_axis']
-                    other_E7 = info_dict[workstations[i]]['zipData']['other_E7']
-                if i >= old_len:
-                    is_news = '新工位'
-            content_1 = [i + 1, depart, localLv1, localLv2, localLv3,
-                         workstations[i],
-                         create_time, size, state, totalFiles, folge_num, makro_num, up_num, serial_number, robot_type,
-                         mames_offsets, version, tech_packs, is_axis_7, E1, E2, seven_axis, other_E7, is_news]
-            sh.append(content_1)
-    # print(SUM)
-
 def analysisZip(rob_program_data, wb):
     try:
         filezip = zipfile.ZipFile(rob_program_data.path['path_origin'], "r")
@@ -303,6 +228,82 @@ def Reforming(SUM):
                 continue
 
 
+def backupOverview(wb, SUM):
+    # 读取json文件
+    book_standard = xlrd.open_workbook(os.path.join(PATH_STANDARD, FILE_STANDARD), formatting_info=True)
+    sh_standard = book_standard.sheet_by_name('RobStandard')
+    nrows = sh_standard.nrows
+    sh = wb['机器人备份总览']
+    with open('database/robot_data.json', 'r', encoding='utf-8') as f:
+        info_dict = json.load(f)
+        workstations = []
+        for i in range(1, nrows):
+            workstations.append(sh_standard.cell_value(i, 5))
+        old_len = len(workstations)
+        for dict in info_dict:
+            if dict not in workstations:
+                workstations.append(dict)
+        for i in range(0, len(workstations)):
+            try:
+                depart = sh_standard.cell_value(i + 1, 1)
+                localLv1 = sh_standard.cell_value(i + 1, 2)
+                localLv2 = sh_standard.cell_value(i + 1, 3)
+                localLv3 = sh_standard.cell_value(i + 1, 4)
+            except:
+                depart = 'null'
+                localLv1 = 'null'
+                localLv2 = 'null'
+                localLv3 = 'null'
+            create_time = 'null'
+            size = 'null'
+            try:
+                state = info_dict[workstations[i]]['zipData']['state']
+            except:
+                state = '未备份'
+            totalFiles = 0
+            makro_num = 0
+            folge_num = 0
+            up_num = 0
+            serial_number = 'null'
+            robot_type = 'null'
+            mames_offsets = 'null'
+            version = 'null'
+            tech_packs = 'null'
+            is_axis_7 = 'null'
+            E1 = 'null'
+            E2 = 'null'
+            is_news = 'null'
+            if workstations[i] in info_dict or i >= old_len:
+                localLv1 = info_dict[workstations[i]]['data']['localLv1']
+                localLv2 = info_dict[workstations[i]]['data']['localLv2']
+                localLv3 = info_dict[workstations[i]]['data']['localLv3']
+                create_time = info_dict[workstations[i]]['meta']['mtime']
+                size = info_dict[workstations[i]]['meta']['size']
+                totalFiles = info_dict[workstations[i]]['zipData']['total_files']
+                folge_num = info_dict[workstations[i]]['zipData']['file_folge_num']
+                makro_num = info_dict[workstations[i]]['zipData']['file_makro_num']
+                up_num = info_dict[workstations[i]]['zipData']['file_up_num']
+                if info_dict[workstations[i]]['zipData']['state'] == '备份完好':
+                    serial_number = info_dict[workstations[i]]['zipData']['serial_number']
+                    robot_type = info_dict[workstations[i]]['zipData']['robot_type']
+                    mames_offsets = info_dict[workstations[i]]['zipData']['mames_offsets']
+                    version = info_dict[workstations[i]]['zipData']['version']
+                    tech_packs = info_dict[workstations[i]]['zipData']['tech_packs']
+                    is_axis_7 = info_dict[workstations[i]]['zipData']['is_axis_7']
+                    E1 = info_dict[workstations[i]]['zipData']['E1']
+                    E2 = info_dict[workstations[i]]['zipData']['E2']
+                    seven_axis = info_dict[workstations[i]]['zipData']['seven_axis']
+                    other_E7 = info_dict[workstations[i]]['zipData']['other_E7']
+                if i >= old_len:
+                    is_news = '新工位'
+            content_1 = [i + 1, depart, localLv1, localLv2, localLv3,
+                         workstations[i],
+                         create_time, size, state, totalFiles, folge_num, makro_num, up_num, serial_number, robot_type,
+                         mames_offsets, version, tech_packs, is_axis_7, E1, E2, seven_axis, other_E7, is_news]
+            sh.append(content_1)
+    # print(SUM)
+
+
 def main():
     # 总结
     global SUM
@@ -332,19 +333,6 @@ def main():
     print('========================机器人overview--start========================')
     backupOverview(wb, SUM)
     print('========================机器人overview--end========================')
-    # logWriteTitle(PATH_BASE + '\\' + LOG_FILE_NAME, 'end')
-    # logWriteTitle(PATH_TRASH + '\\' + LOG_TARSH_NAME, 'end')
-    #
-    # backupState()
-
-    # # 2.解压某文件到指定文件夹
-    # extractFile()
-    #
-    # # 3.解析文件，提取数据
-    # getfileData()
-    #
-    # # 4.导出数据
-    # exportfileData()
     wb.save(os.path.join(PATH_REPORT, FILE_REPORT))
 
 

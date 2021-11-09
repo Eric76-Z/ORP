@@ -1,24 +1,22 @@
 # 获取机器人数据
 import json
 import os
+import re
 import zipfile
 
 from openpyxl import Workbook
 
-from src.common.setting import RobProgramComment, PATH_REPORT, SH_ROB_COMMENT_ANALYSE, \
-    ROB_COMMENT_REPORT, PATH_PROGRAM, ROB_COMMENT_REPORT_BASE
+from src.common.rob_program_comment_setting import RobProgramComment, SH_ROB_COMMENT_ANALYSE, PATH_PROGRAM, \
+    ROB_COMMENT_OVERVIEW_REPORT_BASE, ROB_COMMENT_ANALYSE_REPORT_BASE, ROB_COMMENT_OVERVIEW_REPORT
 from src.common.utils import TimeStampToTime, getFileSize, logWrite, createFolder, createSheet
 
 
 # 1、读取机器人zip相关性息
-
 def RobotInfo(SUM, wb):
     rob_program_comment_json = {}
-    print(PATH_PROGRAM)
     for root, dirs, files in os.walk(PATH_PROGRAM):
         for name in files:
             originpath = os.path.join(root, name)
-            print(originpath)
             if zipfile.is_zipfile(originpath):
                 rob_program_comment = RobProgramComment()
                 SUM['total_files'] = SUM['total_files'] + 1
@@ -54,6 +52,10 @@ def analysisZip(rob_program_comment, wb):
         try:
             for file in filezip.namelist():
                 if file.split('/')[-1] == 'RefListe.txt':
+                    create_time = filezip.getinfo(file).date_time
+                    rob_program_comment.zipData['create_time'] = str(create_time[0]) + '-' + str(create_time[1]) + '-' + \
+                                                                 str(create_time[2]) + ' ' + str(create_time[3]) + ':' + \
+                                                                 str(create_time[4]) + ':' + str(create_time[5])
                     RefListe = filezip.open(file)
                     analyseRefListe(RefListe)
         except Exception as e:
@@ -70,7 +72,22 @@ def analysisZip(rob_program_comment, wb):
 
 def analyseRefListe(RefListe):
     for l in RefListe.readlines():
-        print(l)
+        # if str(l).startswith('b\'E'):  # E开头的型号
+        #     print(str(l))
+        # print(l)
+        l = str(l)
+        if len(re.findall(r"E\s\d{1,4}", l)) != 0:
+            E1 = re.search(r"E\s\d{1,4}", l).group()
+            E1 = E1.replace(" ", "")  # 去除空格
+            E2 = re.search(r'\[.*]', l).group()[1:-1]
+            E2 = E2.replace(',', '')  # 去除逗号
+            E3 = re.search(r']\s*(Folge|Makro|UP).*$', l).group()
+            E3 = E3.split('  ')[-1]
+            E3 = E3.strip()
+            E3 = E3.split('\\r\\n')[0]
+            # print(type(E2))
+            # print(E1 + '-' + E2)
+            print(E3)
 
 
 def main():
@@ -87,14 +104,15 @@ def main():
         'min_file_size': '1000.0 MB',
         'max_file_size': '00.0 MB'
     }
-    createFolder(PATH_REPORT)
-    wb = Workbook(write_only=True)
-    createSheet(wb=wb, sh_name='机器人注释解析', sh_index=1, sh_title=SH_ROB_COMMENT_ANALYSE)
-    # createSheet(wb=wb, sh_name='机器人备份分析', sh_index=2, sh_title=SH_ROB_BACKUP_ANA)
-    # createSheet(wb=wb, sh_name='log', sh_index=3, sh_title=SH_LOG_TITLE)
+    createFolder(ROB_COMMENT_OVERVIEW_REPORT_BASE)
+    wb1 = Workbook(write_only=True)
+    createSheet(wb=wb1, sh_name='机器人注释解析', sh_index=1, sh_title=SH_ROB_COMMENT_ANALYSE)
+    # createFolder(ROB_COMMENT_ANALYSE_REPORT_BASE)
+    # wb2 = Workbook(write_only=True)
+    # createSheet(wb=wb2, sh_name='机器人注释解析', sh_index=1, sh_title=SH_ROB_COMMENT_ANALYSE)
 
     print('========================获取机器人数据--start========================')
-    RobotInfo(SUM, wb)
+    RobotInfo(SUM, wb1)
     print('========================获取机器人数据--end========================')
     # print('========================移动重整备份--start========================')
     # Reforming(SUM)
@@ -115,7 +133,7 @@ def main():
     #
     # # 4.导出数据
     # exportfileData()
-    wb.save(os.path.join(ROB_COMMENT_REPORT_BASE, ROB_COMMENT_REPORT))
+    wb1.save(os.path.join(ROB_COMMENT_OVERVIEW_REPORT_BASE, ROB_COMMENT_OVERVIEW_REPORT))
 
 
 if __name__ == "__main__":
