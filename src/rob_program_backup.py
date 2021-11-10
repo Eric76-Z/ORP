@@ -194,9 +194,6 @@ def analysisZip(rob_program_data, wb):
                     rob_program_data.zipData['is_axis_7'] = '7轴'
                 else:
                     rob_program_data.zipData['is_axis_7'] = '非7轴'
-
-            # if rob_program_data.data['workstationname'] == '5330R07':
-            #     print(rob_program_data.zipData)
         except Exception as e:
             print(rob_program_data.path['path_origin'] + str(e))
         rob_program_data.zipData['state'] = '备份完好'  # zip文件完好

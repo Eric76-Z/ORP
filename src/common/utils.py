@@ -19,9 +19,11 @@ def createSheet(wb, sh_name, sh_index, sh_title):
     sh_index:sheet的index
     sh_title: sheet第一行标题，为列表
     '''
+
     wb.create_sheet(title=sh_name, index=sh_index)
-    sh_log = wb[sh_name]
-    sh_log.append(sh_title)
+    sh = wb[sh_name]
+    sh.append(sh_title)
+    return
 
 
 def logTrash(controllername, msg):
@@ -63,3 +65,4 @@ def createFolder(path):
         os.makedirs(path)  # makedirs 创建文件时如果路径不存在会创建这个路径
     else:
         pass
+
