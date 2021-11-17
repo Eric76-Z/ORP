@@ -2,6 +2,7 @@ from src.common.pathmap import pathmap
 from src.common.setting import PATH_BASE, time_now
 
 # =============================================机器人程序注释===============================================
+SUM = 38
 PATH_PROGRAM = PATH_BASE + '\\' + '机器人备份'  # 目标机器人被封所在文件夹
 SH_ROB_COMMENT_OVERVIEW = ['id', '部门', '车间', '区域', '线体', '工位', '创建时间', '链接']
 SH_ROB_COMMENT_ANALYSE = ['id', '区域', '线体', '工位', '信号类', '信号', '现注释', '标准注释', '相似度(标准)', '推荐注释', '相似度(推荐)', '是否修改注释',

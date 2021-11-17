@@ -6,20 +6,21 @@ import time
 import zipfile
 from difflib import SequenceMatcher
 
+from tqdm import tqdm
 from openpyxl import Workbook, load_workbook
 
 from src.common.rob_program_backup_setting import SH_LOG_TITLE
 from src.common.rob_program_comment_setting import RobProgramComment, SH_ROB_COMMENT_ANALYSE, PATH_PROGRAM, \
     ROB_COMMENT_OVERVIEW_REPORT_BASE, ROB_COMMENT_OVERVIEW_REPORT, \
-    SH_ROB_COMMENT_OVERVIEW, STANDARD_COMMENT, BID_DATA_TEMPLE, SH_BID_DATA_TEMPLE
+    SH_ROB_COMMENT_OVERVIEW, STANDARD_COMMENT, BID_DATA_TEMPLE, SH_BID_DATA_TEMPLE, SUM
 from src.common.setting import PATH_BASE, time_now, GET_BIG_DATA_SIMPLE
-from src.common.utils import TimeStampToTime, getFileSize, logWrite, createFolder, createSheet, backSignalSort
+from src.common.utils import TimeStampToTime, getFileSize, logWrite, createFolder, createSheet, backSignalSort, \
+    process_bar
 
 
 # 1、读取机器人zip相关信息
 def RobotInfo(standard_comment, GET_BIG_DATA_SIMPLE):
     print('========================overview表格--start========================')
-
     createFolder(ROB_COMMENT_OVERVIEW_REPORT_BASE)
     wb = Workbook(write_only=True)
     createSheet(wb=wb, sh_name='机器人注释解析总览', sh_index=1, sh_title=SH_ROB_COMMENT_OVERVIEW)
@@ -36,94 +37,100 @@ def RobotInfo(standard_comment, GET_BIG_DATA_SIMPLE):
         for name in files:
             originpath = os.path.join(root, name)
             if zipfile.is_zipfile(originpath):
-                rob_program_comment = RobProgramComment()
-                # ================path==================
-                rob_program_comment.path['path_origin'] = originpath  # 原始路径
-                # ================meta==================
-                rob_program_comment.meta['title'] = name  # 文件名
-                rob_program_comment.meta['format'] = 'zip'  # 文件后缀
-                rob_program_comment.meta['mtime'] = TimeStampToTime(os.path.getmtime(originpath))  # 原数据中修改时间，可视为创建时间
-                rob_program_comment.meta['size'] = getFileSize(originpath)
-                # ================data==================
-                rob_program_comment.data['filename'] = name
-                rob_program_comment.data['controllername'] = name.split('.zip')[0]  # eg.k2a3a131s460r04
-                rob_program_comment.data['workstationname'] = rob_program_comment.data['controllername'][
-                                                              -7:].upper()  # 截取的 eg.s460r04
-                rob_program_comment.data['localLv1'] = rob_program_comment.localLv1()
-                rob_program_comment.data['localLv2'] = rob_program_comment.localLv2()
-                rob_program_comment.data['localLv3'] = rob_program_comment.localLv3()
-                if GET_BIG_DATA_SIMPLE == True:
-                    big_data_temple = backBigDataSimple(rob_program_comment, big_data_temple)
-                else:
-                    # print('========================解析机器人备份--start========================')
-                    # 创建文件夹
-                    ROB_COMMENT_ANALYSE_REPORT_BASE = PATH_BASE + '\\' + '机器人注释解析详情报告' + '\\' + str(
-                        time_now.year) + str(
-                        time_now.month) + str(
-                        time_now.day) + '\\' + str(
-                        time_now.hour) + str(
-                        time_now.minute) + str(time_now.second) + '\\' + rob_program_comment.data[
-                                                          'localLv1'] + '\\' + \
-                                                      rob_program_comment.data['localLv2'] + '\\' + \
-                                                      rob_program_comment.data[
-                                                          'localLv3']
-                    # ROB_COMMENT_ANALYSE_REPORT_TIME =
-                    createFolder(ROB_COMMENT_ANALYSE_REPORT_BASE)
-                    ROB_COMMENT_ANALYSE_REPORT = rob_program_comment.data['controllername'] + '.xlsx'
-                    ay_path = os.path.join(ROB_COMMENT_ANALYSE_REPORT_BASE, ROB_COMMENT_ANALYSE_REPORT)  # 保存路径
-                    analysisZip(rob_program_comment, wb=wb, standard_comment=standard_comment, path=ay_path)
-                    # print('========================解析机器人备份--end========================')
-                # 添加入rob_program_comment_json
-                rob_program_comment_json[rob_program_comment.data['workstationname']] = rob_program_comment
+                # 显示进度条
+                for i in tqdm(range(SUM)):
+                    rob_program_comment = RobProgramComment()
+                    # ================path==================
+                    rob_program_comment.path['path_origin'] = originpath  # 原始路径
+                    # ================meta==================
+                    rob_program_comment.meta['title'] = name  # 文件名
+                    rob_program_comment.meta['format'] = 'zip'  # 文件后缀
+                    rob_program_comment.meta['mtime'] = TimeStampToTime(os.path.getmtime(originpath))  # 原数据中修改时间，可视为创建时间
+                    rob_program_comment.meta['size'] = getFileSize(originpath)
+                    # ================data==================
+                    rob_program_comment.data['filename'] = name
+                    rob_program_comment.data['controllername'] = name.split('.zip')[0]  # eg.k2a3a131s460r04
+                    rob_program_comment.data['workstationname'] = rob_program_comment.data['controllername'][
+                                                                  -7:].upper()  # 截取的 eg.s460r04
+                    rob_program_comment.data['localLv1'] = rob_program_comment.localLv1()
+                    rob_program_comment.data['localLv2'] = rob_program_comment.localLv2()
+                    rob_program_comment.data['localLv3'] = rob_program_comment.localLv3()
 
-                # 机器人overview表格写入
-                ws = wb['机器人注释解析总览']
-                i = i + 1
-                ws.append([i, 'PFH2B', rob_program_comment.data['localLv1'],
-                           rob_program_comment.data['localLv2'],
-                           rob_program_comment.data['localLv3'], rob_program_comment.data['workstationname'],
-                           rob_program_comment.meta['mtime']])
-                ay_path = ay_path.replace(PATH_BASE, '..\\..')
-                ws.cell(row=i + 1, column=8).hyperlink = ay_path
+                    if GET_BIG_DATA_SIMPLE == True:
+                        big_data_temple = backBigDataSimple(rob_program_comment, big_data_temple)
+                    else:
+                        # 创建文件夹
+                        ROB_COMMENT_ANALYSE_REPORT_BASE = PATH_BASE + '\\' + '机器人注释解析详情报告' + '\\' + str(
+                            time_now.year) + str(
+                            time_now.month) + str(
+                            time_now.day) + '\\' + str(
+                            time_now.hour) + str(
+                            time_now.minute) + str(time_now.second) + '\\' + rob_program_comment.data[
+                                                              'localLv1'] + '\\' + \
+                                                          rob_program_comment.data['localLv2'] + '\\' + \
+                                                          rob_program_comment.data[
+                                                              'localLv3']
+                        # ROB_COMMENT_ANALYSE_REPORT_TIME =
+                        createFolder(ROB_COMMENT_ANALYSE_REPORT_BASE)
+                        ROB_COMMENT_ANALYSE_REPORT = rob_program_comment.data['controllername'] + '.xlsx'
+                        ay_path = os.path.join(ROB_COMMENT_ANALYSE_REPORT_BASE, ROB_COMMENT_ANALYSE_REPORT)  # 保存路径
+                        # print('========================解析机器人备份--start========================')
+                        analysisZip(rob_program_comment, wb=wb, standard_comment=standard_comment, path=ay_path)
+                        # print('========================解析机器人备份--end========================')
+                        # 机器人overview表格写入
+                        ws = wb['机器人注释解析总览']
+                        i = i + 1
+                        ws.append([i, 'PFH2B', rob_program_comment.data['localLv1'],
+                                   rob_program_comment.data['localLv2'],
+                                   rob_program_comment.data['localLv3'], rob_program_comment.data['workstationname'],
+                                   rob_program_comment.meta['mtime']])
+                        ay_path = ay_path.replace(PATH_BASE, '..\\..')
+                        ws.cell(row=i + 1, column=8).hyperlink = ay_path
+                        # 添加入rob_program_comment_json
+                        rob_program_comment_json[rob_program_comment.data['workstationname']] = rob_program_comment
+
             else:
                 msg = '备份可能损坏!!!源路径为：' + originpath + ';'
                 logWrite(wb=wb, controllername=name, sort='警告', msg=msg)
-    wb.save(ov_path)
-    wb.save(PATH_BASE + '\\' + '机器人注释报告总览new.xlsx')
-    wb.close()
-    print('========================overview表格--end========================')
-
-    with open('database/robot_comment.json', "w", encoding='utf-8') as f:
-        f.write(json.dumps(rob_program_comment_json, default=lambda obj: obj.__dict__, indent=4, ensure_ascii=False))
-        f.close()
-    if GET_BIG_DATA_SIMPLE == True:
+    if GET_BIG_DATA_SIMPLE == False:
+        # 写入json文件
+        with open('database/robot_comment.json', "w", encoding='utf-8') as f:
+            f.write(json.dumps(rob_program_comment_json, default=lambda obj: obj.__dict__, indent=4,
+                               ensure_ascii=False))
+            f.close()
+        wb.save(ov_path)
+        # wb.save(PATH_BASE + '\\' + '机器人注释报告总览new.xlsx')
+        wb.close()
+        print('========================overview表格--end========================')
+    else:
         # 写入json
         with open('database/recommend.json', "w", encoding='utf-8') as f:
             f.write(
                 json.dumps(big_data_temple, default=lambda obj: obj.__dict__, indent=4, ensure_ascii=False))
             f.close()
-        # 创建工作表，写入内容
-        wb4 = Workbook(write_only=True)
-        createSheet(wb=wb4, sh_name='机器人注释大数据统计', sh_index=1,
-                    sh_title=SH_BID_DATA_TEMPLE)
-        wb4.save(BID_DATA_TEMPLE)
-        wb4.close()
+            # 创建工作表，写入内容
+            wb4 = Workbook(write_only=True)
+            createSheet(wb=wb4, sh_name='机器人注释大数据统计', sh_index=1,
+                        sh_title=SH_BID_DATA_TEMPLE)
+            wb4.save(BID_DATA_TEMPLE)
+            wb4.close()
 
-        wb4_reopen = load_workbook(BID_DATA_TEMPLE)
-        ws4_reopen = wb4_reopen['机器人注释大数据统计']
-        i = 0
-        for b in big_data_temple:
-            i = i + 1
-            # print(big_data_temple[b]['recommend'])
-            key, = big_data_temple[b]['recommend']
-            # print(key)
-            list = [i, b, '总数' + str(big_data_temple[b]['sum']), key, big_data_temple[b]['recommend'][key]['num'],
-                    big_data_temple[b]['recommend'][key]['ratio']]
-            for c in big_data_temple[b]['comments']:
-                list = list + [c, big_data_temple[b]['comments'][c]['num'], big_data_temple[b]['comments'][c]['ratio']]
-            ws4_reopen.append(list)
-        wb4_reopen.save(BID_DATA_TEMPLE)
-        wb4_reopen.close()
+            wb4_reopen = load_workbook(BID_DATA_TEMPLE)
+            ws4_reopen = wb4_reopen['机器人注释大数据统计']
+            i = 0
+            for b in big_data_temple:
+                i = i + 1
+                # print(big_data_temple[b]['recommend'])
+                key, = big_data_temple[b]['recommend']
+                # print(key)
+                list = [i, b, '总数' + str(big_data_temple[b]['sum']), key, big_data_temple[b]['recommend'][key]['num'],
+                        big_data_temple[b]['recommend'][key]['ratio']]
+                for c in big_data_temple[b]['comments']:
+                    list = list + [c, big_data_temple[b]['comments'][c]['num'],
+                                   big_data_temple[b]['comments'][c]['ratio']]
+                ws4_reopen.append(list)
+            wb4_reopen.save(BID_DATA_TEMPLE)
+            wb4_reopen.close()
 
 
 def analysisZip(rob_program_comment, wb, standard_comment, path):
@@ -143,12 +150,12 @@ def analysisZip(rob_program_comment, wb, standard_comment, path):
                     wb2 = Workbook(write_only=True)
                     # 返回的数据
                     ret = analyseRefListe(RefListe)
+
                     # print(SH_ROB_COMMENT_ANALYSE + ret['used_all'])
                     createSheet(wb=wb2, sh_name='机器人注释解析', sh_index=1,
                                 sh_title=(SH_ROB_COMMENT_ANALYSE + ret['used_all']))
                     wb2.save(path)
                     wb2.close()
-
                     wb2_reopen = load_workbook(path)
                     ws2_reopen = wb2_reopen['机器人注释解析']
                     # # 写入数据
@@ -189,6 +196,7 @@ def analysisZip(rob_program_comment, wb, standard_comment, path):
                             j = j + 1
                             index = ret['used_all'].index(u)
                             ws2_reopen.cell(row=i + 1, column=index + 15).value = '*'
+
                     wb2_reopen.save(path)
                     wb2_reopen.close()
         except Exception as e:
