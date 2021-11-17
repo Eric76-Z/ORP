@@ -66,3 +66,31 @@ def createFolder(path):
     else:
         pass
 
+
+def backSignalSort(signal):
+    if signal.startswith('E'):
+        return 'E-输入端'
+    elif signal.startswith('A'):
+        return 'A-输出端'
+    elif signal.startswith('M'):
+        return 'M-标记器'
+    elif signal.startswith('I'):
+        return 'I-计数器'
+    elif signal.startswith('ana'):
+        return 'ana-模拟输出端'
+    elif signal.startswith('bin'):
+        return 'bin-二进制输出端'
+    elif signal.startswith('t'):
+        return 't-计数器'
+    elif signal.startswith('F'):
+        return 'F-旗标'
+    elif signal.startswith('T'):
+        return 'T-计时器旗标'
+    elif signal.startswith('Makro'):
+        return 'Makro-宏'
+    elif signal.startswith('UP'):
+        return 'UP-子程序'
+    elif signal.startswith('cell'):
+        return 'cell'
+    else:
+        return None
