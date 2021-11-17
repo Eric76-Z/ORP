@@ -38,7 +38,7 @@ def RobotInfo(standard_comment, GET_BIG_DATA_SIMPLE):
             originpath = os.path.join(root, name)
             if zipfile.is_zipfile(originpath):
                 # 显示进度条
-                for i in tqdm(range(SUM)):
+                for i in tqdm(range(len(files))):
                     rob_program_comment = RobProgramComment()
                     # ================path==================
                     rob_program_comment.path['path_origin'] = originpath  # 原始路径
