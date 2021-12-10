@@ -141,3 +141,35 @@ pathmap = {
         'Lv3': 'STIR',
     }
 }
+
+robtype_cabinet_map = {
+    'V8.2.20 HF04': {
+        'light_load': {
+            'no_linear_units': {
+                'KSP2': 'KSP 3*40',
+                'KSP1': 'KSP 3*20',
+                'KPP': 'KPP 600-20'
+            },
+            'linear_units': {
+                'KSP2': 'KSP 3*40',
+                'KSP1': 'KSP 3*20',
+                'KPP': 'KPP 600-20 1*40'
+            }
+
+        },
+        'heavy_load': {
+            'no_linear_units': {
+                'KSP2': 'KSP 3*64',
+                'KSP1': 'KSP 3*40',
+                'KPP': 'KPP 600-20'
+            },
+            'linear_units': {
+                'KSP2': 'KSP 3*64',
+                'KSP1': 'KSP 3*40',
+                'KPP': 'KPP 600-20 1*64'
+            }
+
+        }
+    }
+
+}

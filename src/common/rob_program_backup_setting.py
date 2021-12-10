@@ -1,4 +1,4 @@
-from src.common.pathmap import pathmap
+from src.common.constant import pathmap
 from src.common.setting import PATH_BASE, time_now
 
 PATH_ORIGIN_BACKUP = PATH_BASE + '\\' + 'old'  # 原备份所在文件夹

@@ -1,4 +1,4 @@
-from src.common.pathmap import pathmap
+from src.common.constant import pathmap
 from src.common.setting import PATH_BASE, time_now
 
 # =============================================机器人程序注释===============================================

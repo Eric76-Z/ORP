@@ -6,7 +6,7 @@ import time
 import xlrd
 from xlutils.copy import copy
 
-from src.common.pathmap import pathmap
+from src.common.constant import pathmap
 
 # 预设变量
 BASE_PATH = 'F:\\New folder'

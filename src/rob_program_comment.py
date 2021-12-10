@@ -34,60 +34,59 @@ def RobotInfo(standard_comment, GET_BIG_DATA_SIMPLE):
     big_data_temple = {}
     i = 0
     for root, dirs, files in os.walk(PATH_PROGRAM):
-        for name in files:
+        # 显示进度条
+        for name in tqdm(files):
             originpath = os.path.join(root, name)
             if zipfile.is_zipfile(originpath):
-                # 显示进度条
-                for i in tqdm(range(len(files))):
-                    rob_program_comment = RobProgramComment()
-                    # ================path==================
-                    rob_program_comment.path['path_origin'] = originpath  # 原始路径
-                    # ================meta==================
-                    rob_program_comment.meta['title'] = name  # 文件名
-                    rob_program_comment.meta['format'] = 'zip'  # 文件后缀
-                    rob_program_comment.meta['mtime'] = TimeStampToTime(os.path.getmtime(originpath))  # 原数据中修改时间，可视为创建时间
-                    rob_program_comment.meta['size'] = getFileSize(originpath)
-                    # ================data==================
-                    rob_program_comment.data['filename'] = name
-                    rob_program_comment.data['controllername'] = name.split('.zip')[0]  # eg.k2a3a131s460r04
-                    rob_program_comment.data['workstationname'] = rob_program_comment.data['controllername'][
-                                                                  -7:].upper()  # 截取的 eg.s460r04
-                    rob_program_comment.data['localLv1'] = rob_program_comment.localLv1()
-                    rob_program_comment.data['localLv2'] = rob_program_comment.localLv2()
-                    rob_program_comment.data['localLv3'] = rob_program_comment.localLv3()
+                rob_program_comment = RobProgramComment()
+                # ================path==================
+                rob_program_comment.path['path_origin'] = originpath  # 原始路径
+                # ================meta==================
+                rob_program_comment.meta['title'] = name  # 文件名
+                rob_program_comment.meta['format'] = 'zip'  # 文件后缀
+                rob_program_comment.meta['mtime'] = TimeStampToTime(os.path.getmtime(originpath))  # 原数据中修改时间，可视为创建时间
+                rob_program_comment.meta['size'] = getFileSize(originpath)
+                # ================data==================
+                rob_program_comment.data['filename'] = name
+                rob_program_comment.data['controllername'] = name.split('.zip')[0]  # eg.k2a3a131s460r04
+                rob_program_comment.data['workstationname'] = rob_program_comment.data['controllername'][
+                                                              -7:].upper()  # 截取的 eg.s460r04
+                rob_program_comment.data['localLv1'] = rob_program_comment.localLv1()
+                rob_program_comment.data['localLv2'] = rob_program_comment.localLv2()
+                rob_program_comment.data['localLv3'] = rob_program_comment.localLv3()
 
-                    if GET_BIG_DATA_SIMPLE == True:
-                        big_data_temple = backBigDataSimple(rob_program_comment, big_data_temple)
-                    else:
-                        # 创建文件夹
-                        ROB_COMMENT_ANALYSE_REPORT_BASE = PATH_BASE + '\\' + '机器人注释解析详情报告' + '\\' + str(
-                            time_now.year) + str(
-                            time_now.month) + str(
-                            time_now.day) + '\\' + str(
-                            time_now.hour) + str(
-                            time_now.minute) + str(time_now.second) + '\\' + rob_program_comment.data[
-                                                              'localLv1'] + '\\' + \
-                                                          rob_program_comment.data['localLv2'] + '\\' + \
-                                                          rob_program_comment.data[
-                                                              'localLv3']
-                        # ROB_COMMENT_ANALYSE_REPORT_TIME =
-                        createFolder(ROB_COMMENT_ANALYSE_REPORT_BASE)
-                        ROB_COMMENT_ANALYSE_REPORT = rob_program_comment.data['controllername'] + '.xlsx'
-                        ay_path = os.path.join(ROB_COMMENT_ANALYSE_REPORT_BASE, ROB_COMMENT_ANALYSE_REPORT)  # 保存路径
-                        # print('========================解析机器人备份--start========================')
-                        analysisZip(rob_program_comment, wb=wb, standard_comment=standard_comment, path=ay_path)
-                        # print('========================解析机器人备份--end========================')
-                        # 机器人overview表格写入
-                        ws = wb['机器人注释解析总览']
-                        i = i + 1
-                        ws.append([i, 'PFH2B', rob_program_comment.data['localLv1'],
-                                   rob_program_comment.data['localLv2'],
-                                   rob_program_comment.data['localLv3'], rob_program_comment.data['workstationname'],
-                                   rob_program_comment.meta['mtime']])
-                        ay_path = ay_path.replace(PATH_BASE, '..\\..')
-                        ws.cell(row=i + 1, column=8).hyperlink = ay_path
-                        # 添加入rob_program_comment_json
-                        rob_program_comment_json[rob_program_comment.data['workstationname']] = rob_program_comment
+                if GET_BIG_DATA_SIMPLE == True:
+                    big_data_temple = backBigDataSimple(rob_program_comment, big_data_temple)
+                else:
+                    # 创建文件夹
+                    ROB_COMMENT_ANALYSE_REPORT_BASE = PATH_BASE + '\\' + '机器人注释解析详情报告' + '\\' + str(
+                        time_now.year) + str(
+                        time_now.month) + str(
+                        time_now.day) + '\\' + str(
+                        time_now.hour) + str(
+                        time_now.minute) + str(time_now.second) + '\\' + rob_program_comment.data[
+                                                          'localLv1'] + '\\' + \
+                                                      rob_program_comment.data['localLv2'] + '\\' + \
+                                                      rob_program_comment.data[
+                                                          'localLv3']
+                    # ROB_COMMENT_ANALYSE_REPORT_TIME =
+                    createFolder(ROB_COMMENT_ANALYSE_REPORT_BASE)
+                    ROB_COMMENT_ANALYSE_REPORT = rob_program_comment.data['controllername'] + '.xlsx'
+                    ay_path = os.path.join(ROB_COMMENT_ANALYSE_REPORT_BASE, ROB_COMMENT_ANALYSE_REPORT)  # 保存路径
+                    # print('========================解析机器人备份--start========================')
+                    analysisZip(rob_program_comment, wb=wb, standard_comment=standard_comment, path=ay_path)
+                    # print('========================解析机器人备份--end========================')
+                    # 机器人overview表格写入
+                    ws = wb['机器人注释解析总览']
+                    i = i + 1
+                    ws.append([i, 'PFH2B', rob_program_comment.data['localLv1'],
+                               rob_program_comment.data['localLv2'],
+                               rob_program_comment.data['localLv3'], rob_program_comment.data['workstationname'],
+                               rob_program_comment.meta['mtime']])
+                    ay_path = ay_path.replace(PATH_BASE, '..\\..')
+                    ws.cell(row=i + 1, column=8).hyperlink = ay_path
+                    # 添加入rob_program_comment_json
+                    rob_program_comment_json[rob_program_comment.data['workstationname']] = rob_program_comment
 
             else:
                 msg = '备份可能损坏!!!源路径为：' + originpath + ';'
